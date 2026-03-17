@@ -24,7 +24,8 @@ resources:
   - nncp/values.yaml
   - metallb_bgppeers.yaml
   - ocp_networks_netattach.yaml
-  - designateext_metallb.yaml
+  # designate IPAddressPool not needed until OSPRH-26878 is fixed
+  # - designateext_metallb.yaml
 
 patches:
   # Add BGPPeer to BGPAdvertisement
@@ -64,13 +65,14 @@ patches:
       metadata:
         name: .*
       $patch: delete
+  # designate IPAddressPool not needed until OSPRH-26878 is fixed
   # Add designateext to BGPAdvertisement
-  - target:
-      kind: BGPAdvertisement
-    patch: |-
-      - op: add
-        path: /spec/ipAddressPools/-
-        value: designateext
+  # - target:
+  #     kind: BGPAdvertisement
+  #   patch: |-
+  #     - op: add
+  #       path: /spec/ipAddressPools/-
+  #       value: designateext
 
   # tenant IPAddressPool removed
   - target:
@@ -169,25 +171,27 @@ replacements:
           name: bgpnet-worker-3
         fieldPaths:
           - spec.config
+  # yamllint disable rule:comments-indentation
+  # designate NAD and IPAddressPool not needed until OSPRH-26878 is fixed
   # Designate NAD
-  - source:
-      kind: ConfigMap
-      name: network-values
-      fieldPath: data.designate.net-attach-def
-    targets:
-      - select:
-          kind: NetworkAttachmentDefinition
-          name: designate
-        fieldPaths:
-          - spec.config
+  # - source:
+  #     kind: ConfigMap
+  #     name: network-values
+  #     fieldPath: data.designate.net-attach-def
+  #   targets:
+  #     - select:
+  #         kind: NetworkAttachmentDefinition
+  #         name: designate
+  #       fieldPaths:
+  #         - spec.config
   # DesignateExt LB addresses
-  - source:
-      kind: ConfigMap
-      name: network-values
-      fieldPath: data.designateext.lb_addresses
-    targets:
-      - select:
-          kind: IPAddressPool
-          name: designateext
-        fieldPaths:
-          - spec.addresses
+  # - source:
+  #     kind: ConfigMap
+  #     name: network-values
+  #     fieldPath: data.designateext.lb_addresses
+  #   targets:
+  #     - select:
+  #         kind: IPAddressPool
+  #         name: designateext
+  #       fieldPaths:
+  #         - spec.addresses

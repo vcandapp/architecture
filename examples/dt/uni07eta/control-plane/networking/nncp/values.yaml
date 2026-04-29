@@ -202,6 +202,44 @@ data:
         }
       }
 
+  ospbr-100:
+    mtu: 9000
+    vlan: 100
+    base_iface: ospbr
+    net-attach-def: |
+      {
+        "cniVersion": "0.3.1",
+        "name": "ospbr-100",
+        "type": "macvlan",
+        "master": "ospbr-100",
+        "mode": "bridge",
+        "ipam": {
+          "type": "whereabouts",
+          "range": "10.100.0.0/24",
+          "range_start": "10.100.0.10",
+          "range_end": "10.100.0.20"
+        }
+      }
+
+  ospbr-101:
+    mtu: 9000
+    vlan: 101
+    base_iface: ospbr
+    net-attach-def: |
+      {
+        "cniVersion": "0.3.1",
+        "name": "ospbr-101",
+        "type": "macvlan",
+        "master": "ospbr-101",
+        "mode": "bridge",
+        "ipam": {
+          "type": "whereabouts",
+          "range": "10.101.0.0/24",
+          "range_start": "10.101.0.10",
+          "range_end": "10.101.0.20"
+        }
+      }
+
   external:
     dnsDomain: external.openstack.lab
     subnets:

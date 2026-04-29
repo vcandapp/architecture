@@ -1,0 +1,8 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: ospbr-101
+  labels:
+    osp/net: ospbr-101
+    osp/net-attach-def-type: standard

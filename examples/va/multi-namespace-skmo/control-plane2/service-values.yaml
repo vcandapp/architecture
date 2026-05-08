@@ -12,6 +12,7 @@ data:
 
   # --- SKMO-specific overrides ---
   barbican:
+    enabled: true
     barbicanKeystoneListener:
       customServiceConfig: |
         [keystone_notifications]

@@ -9,6 +9,7 @@ data:
   tls:
     caBundleSecretName: custom-ca-certs
   barbican:
+    enabled: true
     barbicanKeystoneListener:
       customServiceConfig: |
         [keystone_notifications]

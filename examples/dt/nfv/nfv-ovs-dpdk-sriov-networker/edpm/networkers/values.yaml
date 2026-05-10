@@ -107,7 +107,20 @@ data:
         subnetName: subnet1
     nodes:
       edpm-networker-0:
+        ansible:
+          ansibleHost: 192.168.122.101
         hostName: edpm-networker-0
+        networks:
+          - defaultRoute: true
+            fixedIP: 192.168.122.101
+            name: ctlplane
+            subnetName: subnet1
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
     services:
       - bootstrap
       - download-cache

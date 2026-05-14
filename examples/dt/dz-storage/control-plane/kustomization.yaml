@@ -285,36 +285,12 @@ replacements:
   - source:
       kind: ConfigMap
       name: service-values
-      fieldPath: data.cinderBackup.replicas
+      fieldPath: data.cinderBackups
     targets:
       - select:
           kind: OpenStackControlPlane
         fieldPaths:
-          - spec.cinder.template.cinderBackup.replicas
-        options:
-          create: true
-  - source:
-      kind: ConfigMap
-      name: service-values
-      fieldPath: data.cinderBackup.customServiceConfig
-    targets:
-      - select:
-          kind: OpenStackControlPlane
-        fieldPaths:
-          - spec.cinder.template.cinderBackup.customServiceConfig
-        options:
-          create: true
-
-  # Set topologyRef.name for cinderBackup
-  - source:
-      kind: ConfigMap
-      name: service-values
-      fieldPath: data.cinderBackup.topologyRef.name
-    targets:
-      - select:
-          kind: OpenStackControlPlane
-        fieldPaths:
-          - spec.cinder.template.cinderBackup.topologyRef.name
+          - spec.cinder.template.cinderBackups
         options:
           create: true
 

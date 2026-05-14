@@ -9,20 +9,26 @@ This section describes how to:
 
 ## Pod Distribution
 
-The generated `OpenStckControlPlane` CR has each pod inherit the `spread-pods` topology, defined in [section 6.4](https://docs.redhat.com/en/documentation/red_hat_openstack_services_on_openshift/18.0/html-single/deploying_a_rhoso_environment_with_distributed_zones/index#proc_create-a-Topology-CR-that-spreads-pods-across-all-zones_distributed-control-plane), except the `cinderVolumes`, `manilaShares` and Glance edge pods, which all use `topologyRef` to run in specific availability zones. Confirm that the pods for these services are running on their expected worker nodes based on the zone those where those worker nodes were tagged.
+The generated `OpenStckControlPlane` CR has each pod inherit the `spread-pods` topology, defined in [section 6.4](https://docs.redhat.com/en/documentation/red_hat_openstack_services_on_openshift/18.0/html-single/deploying_a_rhoso_environment_with_distributed_zones/index#proc_create-a-Topology-CR-that-spreads-pods-across-all-zones_distributed-control-plane), except the `cinderVolumes`, `cinderBackups`, `manilaShares` and Glance edge pods, which all use `topologyRef` to run in specific availability zones. Confirm that the pods for these services are running on their expected worker nodes based on the zone those where those worker nodes were tagged.
 
 Observe the Cinder pod distribution.
 ```shell
 $ oc get pods -l service=cinder -o wide
-NAME                                    READY   STATUS      RESTARTS   AGE    IP               NODE       NOMINATED NODE   READINESS GATES
-cinder-cbca0-api-0                      2/2     Running     0          45h    192.172.40.49    worker-4   <none>           <none>
-cinder-cbca0-api-1                      2/2     Running     0          45h    192.172.16.50    worker-7   <none>           <none>
-cinder-cbca0-api-2                      2/2     Running     0          45h    192.172.28.26    worker-1   <none>           <none>
-cinder-cbca0-scheduler-0                2/2     Running     0          45h    192.172.44.23    worker-5   <none>           <none>
-cinder-cbca0-volume-ontap-iscsi-az0-0   2/2     Running     0          100m   192.172.32.51    worker-2   <none>           <none>
-cinder-cbca0-volume-ontap-iscsi-az1-0   2/2     Running     0          100m   192.172.44.110   worker-5   <none>           <none>
-cinder-cbca0-volume-ontap-iscsi-az2-0   2/2     Running     0          100m   192.172.49.52    worker-8   <none>           <none>
-cinder-db-purge-29170081-s4k78          0/1     Completed   0          23h    192.172.40.57    worker-4   <none>           <none>
+NAME                                      READY   STATUS      RESTARTS   AGE   IP              NODE       NOMINATED NODE   READINESS GATES
+cinder-db-purge-29646721-qrvlq            0/1     Completed   0          12h   192.172.20.66   worker-4   <none>           <none>
+cinder-fc64f-api-0                        2/2     Running     0          24h   192.172.12.33   worker-1   <none>           <none>
+cinder-fc64f-api-1                        2/2     Running     0          24h   192.172.16.43   worker-3   <none>           <none>
+cinder-fc64f-api-2                        2/2     Running     0          24h   192.172.18.20   worker-8   <none>           <none>
+cinder-fc64f-backup-cinder-backup-az0-0   2/2     Running     0          23h   192.172.12.47   worker-1   <none>           <none>
+cinder-fc64f-backup-cinder-backup-az0-1   2/2     Running     0          23h   192.172.8.61    worker-2   <none>           <none>
+cinder-fc64f-backup-cinder-backup-az1-0   2/2     Running     0          23h   192.172.20.63   worker-4   <none>           <none>
+cinder-fc64f-backup-cinder-backup-az1-1   2/2     Running     0          23h   192.172.14.48   worker-5   <none>           <none>
+cinder-fc64f-backup-cinder-backup-az2-0   2/2     Running     0          23h   192.172.6.56    worker-7   <none>           <none>
+cinder-fc64f-backup-cinder-backup-az2-1   2/2     Running     0          23h   192.172.18.60   worker-8   <none>           <none>
+cinder-fc64f-scheduler-0                  2/2     Running     0          24h   192.172.6.37    worker-7   <none>           <none>
+cinder-fc64f-volume-ontap-iscsi-az0-0     2/2     Running     0          23h   192.172.8.59    worker-2   <none>           <none>
+cinder-fc64f-volume-ontap-iscsi-az1-0     2/2     Running     0          23h   192.172.16.53   worker-3   <none>           <none>
+cinder-fc64f-volume-ontap-iscsi-az2-0     2/2     Running     0          23h   192.172.24.54   worker-6   <none>           <none>
 $
 ```
 Observe the Glance pod distribution.
@@ -499,4 +505,60 @@ Mount the share from the virtual machine at the desired path.
 
 ```
 mount -t nfs 10.0.0.42:/share_<UUID> /mnt/share
+```
+
+## Validate Cinder Backups
+
+Create a test volume in AZ1:
+```shell
+$ openstack volume create --size 1 vol-az1 --availability-zone az1
+
+$ openstack volume show vol-az1
+```
+
+### Scenario 1: Backup and restore within the same AZ
+
+Create a backup in AZ1:
+```shell
+$ openstack --os-volume-api-version 3.51 volume backup create --availability-zone az1 --name vol-az1-backup-az1 vol-az1
+
+$ openstack volume backup show vol-az1-backup-az1
+```
+
+Restore the backup to AZ1:
+```shell
+$ openstack --os-volume-api-version 3.47 volume create --backup vol-az1-backup-az1 --availability-zone az1 vol-az1-backup-az1-restore-az1
+
+$ openstack volume show vol-az1-backup-az1-restore-az1
+```
+
+
+### Scenario 2: Backup to different AZ, restore to original AZ
+
+Create a backup in AZ2 for the volume in AZ1: 
+```shell
+$ openstack --os-volume-api-version 3.51 volume backup create --availability-zone az2 --name vol-az1-backup-az2 vol-az1
+
+$ openstack volume backup show vol-az1-backup-az2
+```
+
+Restore the backup back to AZ1:
+```shell
+$ openstack --os-volume-api-version 3.47 volume create --backup vol-az1-backup-az2 --availability-zone az1 vol-az1-backup-az2-restore-az1
+
+$ openstack volume show vol-az1-backup-az2-restore-az1
+```
+
+### Scenario 3: Backup to different AZ, restore to that AZ
+
+Reusing the backup `vol-az1-backup-az2` created in Scenario 2: 
+```shell
+$ openstack volume backup show vol-az1-backup-az2
+```
+
+Restore the AZ2 backup to AZ2:
+```shell
+$ openstack --os-volume-api-version 3.47 volume create --backup vol-az1-backup-az2 --availability-zone az2 vol-az1-backup-az2-restore-az2
+
+$ openstack volume show vol-az1-backup-az2-restore-az2
 ```

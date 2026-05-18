@@ -8,6 +8,7 @@
       - rhoso-architecture-validate-bgp_dt04_ipv6
       - rhoso-architecture-validate-bmo01
       - rhoso-architecture-validate-dcn
+      - rhoso-architecture-validate-dt-sharded
       - rhoso-architecture-validate-dz-storage
       - rhoso-architecture-validate-hci
       - rhoso-architecture-validate-hci-adoption

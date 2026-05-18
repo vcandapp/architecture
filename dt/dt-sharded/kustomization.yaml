@@ -1,0 +1,718 @@
+---
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+secretGenerator:
+  - name: octavia-ca-passphrase
+    literals:
+      - server-ca-passphrase=12345678
+    options:
+      disableNameSuffixHash: true
+
+transformers:
+  - |-
+      apiVersion: builtin
+      kind: NamespaceTransformer
+      metadata:
+        name: _ignored_
+        namespace: openstack
+      setRoleBindingSubjects: none
+      unsetOnly: true
+      fieldSpecs:
+        - path: metadata/name
+          kind: Namespace
+          create: true
+
+components:
+  - ../../lib/control-plane
+
+patches:
+  # Replace galera templates with per-service dedicated databases
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: replace
+        path: /spec/galera/templates
+        value:
+          openstack-barbican:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-cinder:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-designate:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-glance:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-keystone:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-neutron:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-octavia:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-nova:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-nova-cell1:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+          openstack-placement:
+            replicas: 1
+            secret: osp-secret
+            storageRequest: 5Gi
+
+  # Replace memcached templates with per-service dedicated instances.
+  # Only services that support memcachedInstance are included:
+  # keystone, glance, cinder, neutron, horizon, manila, nova.
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: replace
+        path: /spec/memcached/templates
+        value:
+          memcached-keystone:
+            replicas: 1
+          memcached-glance:
+            replicas: 1
+          memcached-cinder:
+            replicas: 1
+          memcached-neutron:
+            replicas: 1
+          memcached-horizon:
+            replicas: 1
+          memcached-nova:
+            replicas: 1
+
+  # Replace rabbitmq templates with per-service dedicated clusters.
+  # rabbitmq and rabbitmq-cell1 are kept for lib/control-plane compatibility.
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: replace
+        path: /spec/rabbitmq/templates
+        value:
+          rabbitmq:
+            replicas: 1
+          rabbitmq-cell1:
+            replicas: 1
+          rabbitmq-barbican:
+            replicas: 1
+          rabbitmq-cinder:
+            replicas: 1
+          rabbitmq-designate:
+            replicas: 1
+          rabbitmq-glance:
+            replicas: 1
+          rabbitmq-keystone:
+            replicas: 1
+          rabbitmq-neutron:
+            replicas: 1
+          rabbitmq-octavia:
+            replicas: 1
+
+  # Point each service to its dedicated galera database
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: replace
+        path: /spec/barbican/template/databaseInstance
+        value: openstack-barbican
+      - op: replace
+        path: /spec/cinder/template/databaseInstance
+        value: openstack-cinder
+      - op: add
+        path: /spec/designate/template/databaseInstance
+        value: openstack-designate
+      - op: replace
+        path: /spec/glance/template/databaseInstance
+        value: openstack-glance
+      - op: replace
+        path: /spec/keystone/template/databaseInstance
+        value: openstack-keystone
+      - op: replace
+        path: /spec/neutron/template/databaseInstance
+        value: openstack-neutron
+      - op: replace
+        path: /spec/octavia/template/databaseInstance
+        value: openstack-octavia
+      - op: replace
+        path: /spec/placement/template/databaseInstance
+        value: openstack-placement
+      - op: replace
+        path: /spec/nova/template/apiDatabaseInstance
+        value: openstack-nova
+      - op: replace
+        path: /spec/nova/template/cellTemplates/cell0/cellDatabaseInstance
+        value: openstack-nova
+      - op: replace
+        path: /spec/nova/template/cellTemplates/cell1/cellDatabaseInstance
+        value: openstack-nova-cell1
+
+  # Point each service to its dedicated memcached instance
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: replace
+        path: /spec/keystone/template/memcachedInstance
+        value: memcached-keystone
+      - op: replace
+        path: /spec/glance/template/memcachedInstance
+        value: memcached-glance
+      - op: replace
+        path: /spec/cinder/template/memcachedInstance
+        value: memcached-cinder
+      - op: replace
+        path: /spec/neutron/template/memcachedInstance
+        value: memcached-neutron
+      - op: replace
+        path: /spec/horizon/template/memcachedInstance
+        value: memcached-horizon
+      - op: replace
+        path: /spec/nova/template/memcachedInstance
+        value: memcached-nova
+
+  # Point each service to its dedicated rabbitmq cluster
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: add
+        path: /spec/barbican/template/rabbitMqClusterName
+        value: rabbitmq-barbican
+      - op: add
+        path: /spec/cinder/template/rabbitMqClusterName
+        value: rabbitmq-cinder
+      - op: add
+        path: /spec/designate/template/rabbitMqClusterName
+        value: rabbitmq-designate
+      - op: add
+        path: /spec/glance/template/rabbitMqClusterName
+        value: rabbitmq-glance
+      - op: add
+        path: /spec/keystone/template/rabbitMqClusterName
+        value: rabbitmq-keystone
+      - op: add
+        path: /spec/neutron/template/rabbitMqClusterName
+        value: rabbitmq-neutron
+      - op: add
+        path: /spec/octavia/template/rabbitMqClusterName
+        value: rabbitmq-octavia
+      - op: replace
+        path: /spec/nova/template/cellTemplates/cell0/messagingBus/cluster
+        value: rabbitmq
+      - op: replace
+        path: /spec/nova/template/cellTemplates/cell1/messagingBus/cluster
+        value: rabbitmq-cell1
+
+  # Add storagemgmt, designate, designateext networks to NetConfig
+  - target:
+      kind: NetConfig
+      name: netconfig
+    patch: |-
+      - op: add
+        path: /spec/networks/-
+        value:
+          dnsDomain: _replaced_
+          name: storagemgmt
+          subnets:
+            - _replaced_
+          mtu: 1500
+      - op: add
+        path: /spec/networks/-
+        value:
+          dnsDomain: _replaced_
+          name: designate
+          subnets:
+            - _replaced_
+          mtu: 1500
+      - op: add
+        path: /spec/networks/-
+        value:
+          dnsDomain: _replaced_
+          name: designateext
+          subnets:
+            - _replaced_
+          mtu: 1500
+
+  # Enable services that are disabled by default
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: replace
+        path: /spec/designate/enabled
+        value: true
+      - op: replace
+        path: /spec/octavia/enabled
+        value: true
+
+  # Reduce replicas to 1 for test DT
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: replace
+        path: /spec/barbican/template/barbicanAPI/replicas
+        value: 1
+      - op: replace
+        path: /spec/barbican/template/barbicanWorker/replicas
+        value: 1
+      - op: replace
+        path: /spec/cinder/template/cinderAPI/replicas
+        value: 1
+      - op: replace
+        path: /spec/designate/template/designateAPI/replicas
+        value: 1
+      - op: replace
+        path: /spec/designate/template/designateBackendbind9/replicas
+        value: 1
+      - op: replace
+        path: /spec/designate/template/designateMdns/replicas
+        value: 1
+      - op: replace
+        path: /spec/designate/template/designateProducer/replicas
+        value: 1
+      - op: replace
+        path: /spec/designate/template/designateWorker/replicas
+        value: 1
+      - op: replace
+        path: /spec/dns/template/replicas
+        value: 1
+      - op: replace
+        path: /spec/keystone/template/replicas
+        value: 1
+      - op: replace
+        path: /spec/neutron/template/replicas
+        value: 1
+      - op: replace
+        path: /spec/nova/template/apiServiceTemplate/replicas
+        value: 1
+      - op: replace
+        path: /spec/nova/template/metadataServiceTemplate/replicas
+        value: 1
+      - op: replace
+        path: /spec/nova/template/schedulerServiceTemplate/replicas
+        value: 1
+      - op: replace
+        path: /spec/placement/template/replicas
+        value: 1
+      - op: replace
+        path: /spec/ovn/template/ovnDBCluster/ovndbcluster-nb/replicas
+        value: 1
+      - op: replace
+        path: /spec/ovn/template/ovnDBCluster/ovndbcluster-sb/replicas
+        value: 1
+
+replacements:
+  # Glance
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.glance.customServiceConfig
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.glance.template.customServiceConfig
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.glance.glanceAPIs.default.replicas
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.glance.template.glanceAPIs.default.replicas
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.glance.glanceAPIs.default.type
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.glance.template.glanceAPIs.default.type
+        options:
+          create: true
+
+  # Cinder
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.cinderBackup.replicas
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.cinder.template.cinderBackup.replicas
+        options:
+          create: true
+
+  # Base rabbitmq endpoint annotations (re-applied after templates replace)
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq.override.service.metadata.annotations
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-cell1.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-cell1.override.service.metadata.annotations
+        options:
+          create: true
+
+  # Per-service rabbitmq endpoint annotations
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-barbican.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-barbican.override.service.metadata.annotations
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-cinder.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-cinder.override.service.metadata.annotations
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-designate.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-designate.override.service.metadata.annotations
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-glance.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-glance.override.service.metadata.annotations
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-keystone.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-keystone.override.service.metadata.annotations
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-neutron.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-neutron.override.service.metadata.annotations
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.rabbitmq-octavia.endpoint_annotations
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq-octavia.override.service.metadata.annotations
+        options:
+          create: true
+  # Rabbitmq service types (base + per-service)
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.lbServiceType
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.rabbitmq.templates.rabbitmq.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-cell1.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-barbican.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-cinder.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-designate.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-glance.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-keystone.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-neutron.override.service.spec.type
+          - spec.rabbitmq.templates.rabbitmq-octavia.override.service.spec.type
+        options:
+          create: true
+
+  # Designate NAD config
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designate.net-attach-def
+    targets:
+      - select:
+          kind: NetworkAttachmentDefinition
+          name: designate
+        fieldPaths:
+          - spec.config
+
+  # Designate bind9Services
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.designate.bind9Services
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.designate.template.designateBackendbind9.bind9Services
+        options:
+          create: true
+
+  # Designate Redis
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.designate-redis.replicas
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.redis.templates.designate-redis.replicas
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.designate-redis.enabled
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.redis.enabled
+        options:
+          create: true
+
+  # Octavia NAD config
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.octavia.net-attach-def
+    targets:
+      - select:
+          kind: NetworkAttachmentDefinition
+          name: octavia
+        fieldPaths:
+          - spec.config
+
+  # Octavia container images
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.octavia.amphoraImageContainerImage
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.octavia.template.amphoraImageContainerImage
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.octavia.apacheContainerImage
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.octavia.template.apacheContainerImage
+        options:
+          create: true
+
+  # Octavia networkAttachments
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.octavia.octaviaAPI.networkAttachments
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.octavia.template.octaviaAPI.networkAttachments
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.octavia.octaviaHousekeeping.networkAttachments
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.octavia.template.octaviaHousekeeping.networkAttachments
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.octavia.octaviaHealthManager.networkAttachments
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.octavia.template.octaviaHealthManager.networkAttachments
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.octavia.octaviaWorker.networkAttachments
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.octavia.template.octaviaWorker.networkAttachments
+        options:
+          create: true
+
+  # OVN controller nicMappings (for octavia bridge)
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.ovn.ovnController.nicMappings
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.ovn.template.ovnController.nicMappings
+        options:
+          create: true
+
+  # storagemgmt NetConfig
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.storagemgmt.dnsDomain
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=storagemgmt].dnsDomain
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.storagemgmt.mtu
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=storagemgmt].mtu
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.storagemgmt.subnets
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=storagemgmt].subnets
+
+  # designate NetConfig
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designate.dnsDomain
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=designate].dnsDomain
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designate.mtu
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=designate].mtu
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designate.subnets
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=designate].subnets
+
+  # designateext NetConfig
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designateext.dnsDomain
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=designateext].dnsDomain
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designateext.mtu
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=designateext].mtu
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designateext.subnets
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=designateext].subnets

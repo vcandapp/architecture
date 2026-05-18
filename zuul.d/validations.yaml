@@ -94,6 +94,20 @@
       cifmw_networking_env_def_file: automation/net-env/dcn.yaml
 - job:
     files:
+    - automation/net-env/dt-sharded.yaml
+    - dt/dt-sharded
+    - examples/dt/dt-sharded
+    - examples/dt/dt-sharded/control-plane
+    - examples/dt/dt-sharded/control-plane/networking
+    - examples/dt/dt-sharded/control-plane/networking/nncp
+    - lib
+    name: rhoso-architecture-validate-dt-sharded
+    parent: rhoso-architecture-base-job
+    vars:
+      cifmw_architecture_scenario: dt-sharded
+      cifmw_networking_env_def_file: automation/net-env/dt-sharded.yaml
+- job:
+    files:
     - automation/mocks/dz-storage.yaml
     - examples/dt/dz-storage/control-plane
     - examples/dt/dz-storage/control-plane/networking

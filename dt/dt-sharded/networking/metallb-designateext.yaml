@@ -1,0 +1,21 @@
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  namespace: metallb-system
+  name: designateext
+  labels:
+    osp/lb-addresses-type: standard
+spec:
+  addresses: []
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: designateext
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - designateext
+  interfaces:
+    - _replaced_

@@ -22,13 +22,44 @@ data:
   cinderAPI:
     replicas: 3
   cinderBackup:
-    replicas: 3
+    replicas: 0
     customServiceConfig: |
       [DEFAULT]
-      backup_driver = cinder.backup.drivers.ceph.CephBackupDriver
-      backup_ceph_conf = /etc/ceph/az0.conf
-      backup_ceph_pool = backups
-      backup_ceph_user = openstack
+      # cinderBackup (singular) is deprecated; use cinderBackups (plural)
+  cinderBackups:
+    az0:
+      customServiceConfig: |
+        [DEFAULT]
+        storage_availability_zone = az0
+        backup_driver = cinder.backup.drivers.ceph.CephBackupDriver
+        backup_ceph_conf = /etc/ceph/az0.conf
+        backup_ceph_pool = backups
+        backup_ceph_user = openstack
+      networkAttachments:
+        - storage
+      replicas: 2
+    az1:
+      customServiceConfig: |
+        [DEFAULT]
+        storage_availability_zone = az1
+        backup_driver = cinder.backup.drivers.ceph.CephBackupDriver
+        backup_ceph_conf = /etc/ceph/az1.conf
+        backup_ceph_pool = backups
+        backup_ceph_user = openstack
+      networkAttachments:
+        - storage
+      replicas: 2
+    az2:
+      customServiceConfig: |
+        [DEFAULT]
+        storage_availability_zone = az2
+        backup_driver = cinder.backup.drivers.ceph.CephBackupDriver
+        backup_ceph_conf = /etc/ceph/az2.conf
+        backup_ceph_pool = backups
+        backup_ceph_user = openstack
+      networkAttachments:
+        - storage
+      replicas: 2
   cinderVolumes:
     az0:
       customServiceConfig: |
@@ -439,6 +470,7 @@ data:
         - propagation:
             - CinderVolume
             - CinderBackup
+            - CinderBackups
             - GlanceAPI
             - ManilaShare
           extraVolType: Ceph

@@ -112,6 +112,17 @@ replacements:
   - source:
       kind: ConfigMap
       name: service-values
+      fieldPath: data.cinderBackups
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.cinder.template.cinderBackups
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: service-values
       fieldPath: data.cinderVolumes
     targets:
       - select:

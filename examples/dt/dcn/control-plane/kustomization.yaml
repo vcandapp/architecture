@@ -8,3 +8,11 @@ components:
 resources:
   - networking/nncp/values.yaml
   - service-values.yaml
+
+patches:
+  - target:
+      kind: OpenStackControlPlane
+    patch: |-
+      - op: add
+        path: /spec/cinder/template/cinderBackups
+        value: {}

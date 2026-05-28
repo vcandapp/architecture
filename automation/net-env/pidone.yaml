@@ -228,6 +228,82 @@ instances:
         parent_interface: eth1
         skip_nm: false
         vlan_id: 22
+  compute-3:
+    hostname: compute-3
+    name: compute-3
+    networks:
+      ctlplane:
+        interface_name: eth1
+        ip_v4: 192.168.122.103
+        mac_addr: "52:54:00:17:05:48"
+        mtu: 1500
+        network_name: ctlplane
+        skip_nm: false
+      internalapi:
+        interface_name: eth1.20
+        ip_v4: 172.17.0.103
+        mac_addr: "52:54:00:05:db:04"
+        mtu: 1500
+        network_name: internalapi
+        parent_interface: eth1
+        skip_nm: false
+        vlan_id: 20
+      storage:
+        interface_name: eth1.21
+        ip_v4: 172.18.0.103
+        mac_addr: "52:54:00:59:8a:52"
+        mtu: 1500
+        network_name: storage
+        parent_interface: eth1
+        skip_nm: false
+        vlan_id: 21
+      tenant:
+        interface_name: eth1.22
+        ip_v4: 172.19.0.103
+        mac_addr: "52:54:00:0b:1c:d9"
+        mtu: 1500
+        network_name: tenant
+        parent_interface: eth1
+        skip_nm: false
+        vlan_id: 22
+  compute-4:
+    hostname: compute-4
+    name: compute-4
+    networks:
+      ctlplane:
+        interface_name: eth1
+        ip_v4: 192.168.122.104
+        mac_addr: "52:54:00:17:05:4a"
+        mtu: 1500
+        network_name: ctlplane
+        skip_nm: false
+      internalapi:
+        interface_name: eth1.20
+        ip_v4: 172.17.0.104
+        mac_addr: "52:54:00:05:db:06"
+        mtu: 1500
+        network_name: internalapi
+        parent_interface: eth1
+        skip_nm: false
+        vlan_id: 20
+      storage:
+        interface_name: eth1.21
+        ip_v4: 172.18.0.104
+        mac_addr: "52:54:00:59:8a:54"
+        mtu: 1500
+        network_name: storage
+        parent_interface: eth1
+        skip_nm: false
+        vlan_id: 21
+      tenant:
+        interface_name: eth1.22
+        ip_v4: 172.19.0.104
+        mac_addr: "52:54:00:0b:1c:db"
+        mtu: 1500
+        network_name: tenant
+        parent_interface: eth1
+        skip_nm: false
+        vlan_id: 22
   controller-0:
     hostname: controller-0
     name: controller-0

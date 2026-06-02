@@ -192,6 +192,7 @@ data:
 
   heat:
     enabled: true
+    replicas: 3
 
   telemetry:
     enabled: true

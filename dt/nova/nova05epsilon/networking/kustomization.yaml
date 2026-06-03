@@ -25,6 +25,7 @@ components:
 resources:
   - storagemgmt-nad.yaml
   - storagemgmt-metallb.yaml
+  - external-nad.yaml
 
 # Add storagemgmt network template, as it is needed for CephHCI
 patches:
@@ -122,3 +123,15 @@ replacements:
           name: ctlplane
         fieldPaths:
           - spec.interfaces.0
+
+  # External NAD for provider network FIP access
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.external.net-attach-def
+    targets:
+      - select:
+          kind: NetworkAttachmentDefinition
+          name: external
+        fieldPaths:
+          - spec.config

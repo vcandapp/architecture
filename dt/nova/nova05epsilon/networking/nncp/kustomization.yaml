@@ -40,93 +40,92 @@ patches:
       kind: NodeNetworkConfigurationPolicy
       metadata:
         name: node-2
-  # SNO: remove worker scheduling label from nodeSelector
+  # SNO: remove worker scheduling label from nodeSelector.
+  # Use labelSelector because lib/nncp renames the resource before
+  # this component's patches run.
   - target:
       kind: NodeNetworkConfigurationPolicy
-      name: node-0
+      labelSelector: "osp/nncm-config-type=standard"
     patch: |-
       - op: remove
         path: /spec/nodeSelector/node-role.kubernetes.io~1worker
-  # Optional: add storagemgmt VLAN interface to the SNO node.
-  # Uncomment this patch AND node_0.storagemgmt_ip in values.yaml.
-  # Not required for CephHCI (Ceph uses storage network for OSD traffic).
-  # - target:
-  #     kind: NodeNetworkConfigurationPolicy
-  #     name: node-0
-  #   patch: |-
-  #     - op: add
-  #       path: /spec/desiredState/interfaces/-
-  #       value:
-  #         description: storagemgmt vlan host interface
-  #         name: storagemgmt
-  #         state: up
-  #         type: vlan
-  #         mtu: _replaced_
-  #         ipv4:
-  #           address:
-  #           - ip: _replaced_
-  #             prefix-length: _replaced_
-  #           dhcp: false
-  #           enabled: true
-  #         ipv6:
-  #           enabled: false
-  #         vlan:
-  #           base-iface: _replaced_
-  #           id: _replaced_
 
-# Uncomment these replacements together with the storagemgmt patch above
-# replacements:
-#   - source:
-#       kind: ConfigMap
-#       name: network-values
-#       fieldPath: data.node_0.storagemgmt_ip
-#     targets:
-#       - select:
-#           kind: NodeNetworkConfigurationPolicy
-#           name: node-0
-#         fieldPaths:
-#           - spec.desiredState.interfaces.[name=storagemgmt].ipv4.address.0.ip
-#   - source:
-#       kind: ConfigMap
-#       name: network-values
-#       fieldPath: data.storagemgmt.base_iface
-#     targets:
-#       - select:
-#           kind: NodeNetworkConfigurationPolicy
-#         fieldPaths:
-#           - spec.desiredState.interfaces.[name=storagemgmt].vlan.base-iface
-#         options:
-#           create: true
-#   - source:
-#       kind: ConfigMap
-#       name: network-values
-#       fieldPath: data.storagemgmt.vlan
-#     targets:
-#       - select:
-#           kind: NodeNetworkConfigurationPolicy
-#         fieldPaths:
-#           - spec.desiredState.interfaces.[name=storagemgmt].vlan.id
-#         options:
-#           create: true
-#   - source:
-#       kind: ConfigMap
-#       name: network-values
-#       fieldPath: data.storagemgmt.mtu
-#     targets:
-#       - select:
-#           kind: NodeNetworkConfigurationPolicy
-#         fieldPaths:
-#           - spec.desiredState.interfaces.[name=storagemgmt].mtu
-#         options:
-#           create: true
-#   - source:
-#       kind: ConfigMap
-#       name: network-values
-#       fieldPath: data.storagemgmt.prefix-length
-#     targets:
-#       - select:
-#           kind: NodeNetworkConfigurationPolicy
-#         fieldPaths:
-#           - spec.desiredState.interfaces.[name=storagemgmt].ipv4.address.0.prefix-length
-#         options:
-#           create: true
+  # Add external VLAN interface on ospbr for OVN provider network access.
+  - target:
+      kind: NodeNetworkConfigurationPolicy
+      labelSelector: "osp/nncm-config-type=standard"
+    patch: |-
+      - op: add
+        path: /spec/desiredState/interfaces/-
+        value:
+          description: external vlan interface on ospbr
+          name: external
+          state: up
+          type: vlan
+          mtu: _replaced_
+          ipv4:
+            address:
+            - ip: _replaced_
+              prefix-length: _replaced_
+            dhcp: false
+            enabled: true
+          ipv6:
+            enabled: false
+          vlan:
+            base-iface: _replaced_
+            id: _replaced_
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.node_0.external_ip
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=external].ipv4.address.0.ip
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.external.base_iface
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=external].vlan.base-iface
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.external.vlan
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=external].vlan.id
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.external.mtu
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=external].mtu
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.external.prefix-length
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=external].ipv4.address.0.prefix-length
+        options:
+          create: true

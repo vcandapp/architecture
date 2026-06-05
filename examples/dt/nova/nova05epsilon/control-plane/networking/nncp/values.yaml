@@ -312,10 +312,6 @@ data:
     storagemgmt:
         base_iface: CHANGEME_SNO_IFACE
         dnsDomain: storagemgmt.example.com
-        endpoint_annotations:
-            metallb.universe.tf/address-pool: storagemgmt
-            metallb.universe.tf/allow-shared-ip: storagemgmt
-            metallb.universe.tf/loadBalancerIPs: CHANGEME_SNO_STGMGMT_LB_IP
         iface: storagemgmt
         lb_addresses:
             - CHANGEME_SNO_STGMGMT_LB_START-CHANGEME_SNO_STGMGMT_LB_END

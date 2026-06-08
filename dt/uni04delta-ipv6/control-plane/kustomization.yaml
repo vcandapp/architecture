@@ -155,3 +155,16 @@ replacements:
           - spec.heat.enabled
         options:
           create: true
+
+  - source:
+      kind: ConfigMap
+      name: service-values
+      fieldPath: data.heat.replicas
+    targets:
+      - select:
+          kind: OpenStackControlPlane
+        fieldPaths:
+          - spec.heat.template.heatAPI.replicas
+          - spec.heat.template.heatEngine.replicas
+        options:
+          create: true

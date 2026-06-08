@@ -40,14 +40,43 @@ data:
       storage_availability_zone = az0
   cinderAPI:
     replicas: 3
-  cinderBackup:
-    replicas: 0
-    topologyRef:
-      name: azone-node-affinity
-    customServiceConfig: |
-      [DEFAULT]
-      # Not implemented in this example
-
+  cinderBackups:
+    cinder-backup-az0:
+      topologyRef:
+        name: azone-node-affinity
+      customServiceConfig: |
+        [DEFAULT]
+        backup_share = _replaced_
+        backup_driver = cinder.backup.drivers.nfs.NFSBackupDriver
+        backup_mount_point_base = /var/lib/cinder/backup
+        storage_availability_zone = az0
+      networkAttachments:
+        - storage
+      replicas: 2
+    cinder-backup-az1:
+      topologyRef:
+        name: bzone-node-affinity
+      customServiceConfig: |
+        [DEFAULT]
+        backup_share = _replaced_
+        backup_driver = cinder.backup.drivers.nfs.NFSBackupDriver
+        backup_mount_point_base = /var/lib/cinder/backup
+        storage_availability_zone = az1
+      networkAttachments:
+        - storage
+      replicas: 2
+    cinder-backup-az2:
+      topologyRef:
+        name: czone-node-affinity
+      customServiceConfig: |
+        [DEFAULT]
+        backup_share = _replaced_
+        backup_driver = cinder.backup.drivers.nfs.NFSBackupDriver
+        backup_mount_point_base = /var/lib/cinder/backup
+        storage_availability_zone = az2
+      networkAttachments:
+        - storage
+      replicas: 2
   cinderVolumes:
     ontap-iscsi-az0:
       topologyRef:

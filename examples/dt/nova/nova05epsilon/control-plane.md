@@ -18,15 +18,15 @@ Change to the nova05epsilon directory
 cd architecture/examples/dt/nova/nova05epsilon/control-plane
 ```
 
-Edit the [networking/nncp/values.yaml](control-plane/networking/nncp/values.yaml)
-and [networking/dns/values.yaml](control-plane/networking/dns/values.yaml)
-files to suit your environment. Service values (Glance, Nova PCI, telemetry)
-are configured in the top-level [service-values.yaml](service-values.yaml)
-and applied during the post-ceph stage rebuild.
+Edit the [networking/nncp/values.yaml](control-plane/networking/nncp/values.yaml),
+[networking/dns/values.yaml](control-plane/networking/dns/values.yaml) and
+[service-values.yaml](control-plane/service-values.yaml) files to suit
+your environment.
 
 ```shell
 vi networking/nncp/values.yaml
 vi networking/dns/values.yaml
+vi service-values.yaml
 ```
 
 ## Apply node network configuration

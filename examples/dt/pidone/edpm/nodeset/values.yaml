@@ -35,6 +35,10 @@ data:
             nic2: 6b:fe:54:3f:8a:02  # CHANGEME
           edpm-compute-2:
             nic2: 6c:fe:54:3f:8a:02  # CHANGEME
+          edpm-compute-3:
+            nic2: 6d:fe:54:3f:8a:02  # CHANGEME
+          edpm-compute-4:
+            nic2: 6e:fe:54:3f:8a:02  # CHANGEME
         edpm_network_config_template: |
           ---
           {% set mtu_list = [ctlplane_mtu] %}
@@ -136,6 +140,40 @@ data:
         networks:
           - defaultRoute: true
             fixedIP: 192.168.122.102
+            name: ctlplane
+            subnetName: subnet1
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: storagemgmt
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
+      edpm-compute-3:
+        ansible:
+          ansibleHost: 192.168.122.103
+        hostName: edpm-compute-3
+        networks:
+          - defaultRoute: true
+            fixedIP: 192.168.122.103
+            name: ctlplane
+            subnetName: subnet1
+          - name: internalapi
+            subnetName: subnet1
+          - name: storage
+            subnetName: subnet1
+          - name: storagemgmt
+            subnetName: subnet1
+          - name: tenant
+            subnetName: subnet1
+      edpm-compute-4:
+        ansible:
+          ansibleHost: 192.168.122.104
+        hostName: edpm-compute-4
+        networks:
+          - defaultRoute: true
+            fixedIP: 192.168.122.104
             name: ctlplane
             subnetName: subnet1
           - name: internalapi

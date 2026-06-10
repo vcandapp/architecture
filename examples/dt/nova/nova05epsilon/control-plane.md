@@ -113,7 +113,11 @@ oc -n openshift-dns wait dns.operator/default --for condition=Available --timeou
 ```
 
 Now wait for the full control plane readiness before proceeding to
-the data plane stages:
+the data plane stages. Note: the initial control plane deploys
+without Ceph configuration (Glance uses defaults). Ceph backend
+and extraMounts are added in the
+[control-plane-post-ceph](control-plane-post-ceph.md) stage after
+Ceph is installed.
 
 ```shell
 oc wait osctlplane controlplane --for condition=Ready --timeout=600s

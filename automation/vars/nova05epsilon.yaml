@@ -101,14 +101,25 @@ vas:
             type: playbook
             source: "../../hooks/playbooks/ceph.yml"
             inventory: "${HOME}/ci-framework-data/artifacts/ceph_inventory.yml"
-
-      - name: edpm-nodeset-post-ceph
-        path: examples/dt/nova/nova05epsilon
+      - name: control-plane-post-ceph
+        path: examples/dt/nova/nova05epsilon/control-plane-post-ceph
         wait_conditions:
           - >-
             oc -n openstack wait osctlplane controlplane
             --for condition=Ready
             --timeout=20m
+        values:
+          - name: network-values
+            src_file: network-values.yaml
+          - name: service-values
+            src_file: service-values.yaml
+          - name: edpm-nodeset-values-post-ceph
+            src_file: values.yaml
+        build_output: control-plane-post-ceph.yaml
+
+      - name: edpm-nodeset-post-ceph
+        path: examples/dt/nova/nova05epsilon
+        wait_conditions:
           - >-
             oc -n openstack wait osdpns
             gpu-computes-edpm

@@ -1,9 +1,10 @@
-# Update the control plane and finish deploying the data plane after Ceph has been installed
+# Finish deploying the data plane after Ceph has been installed
 
 ## Assumptions
 
 - The [pre-ceph data plane](dataplane-pre-ceph.md) has been deployed
 - Ceph has been installed on the compute nodes
+- The [control plane has been updated with Ceph configuration](control-plane-post-ceph.md)
 
 ## Initialize
 
@@ -19,9 +20,8 @@ Change to the nova05epsilon directory
 cd architecture/examples/dt/nova/nova05epsilon
 ```
 
-Edit the [values.yaml](values.yaml) and [service-values.yaml](service-values.yaml)
-files to suit your environment. In particular, update the Ceph configuration
-placeholders in `values.yaml`:
+Edit the [values.yaml](values.yaml) file to suit your environment.
+In particular, update the Ceph configuration placeholders:
 
 - **`data.ceph_conf`** (DCN convention): A dict mapping Ceph filenames to
   base64-encoded content. For a single-site deployment, use plain filenames.
@@ -48,13 +48,11 @@ Replace `<ceph-fsid>` with the Ceph cluster FSID (from `ceph fsid`).
 
 ```shell
 vi values.yaml
-vi service-values.yaml
 ```
 
-## Update the control plane and deploy the post-ceph dataplane
+## Deploy the post-ceph dataplane
 
-Generate the post-ceph CRs (this includes both the updated control plane
-and the post-ceph nodeset):
+Generate the post-ceph dataplane CRs:
 
 ```shell
 kustomize build > dataplane-nodeset.yaml
@@ -64,12 +62,6 @@ Apply the CRs:
 
 ```shell
 oc apply -f dataplane-nodeset.yaml
-```
-
-Wait for control plane to be available:
-
-```shell
-oc wait osctlplane controlplane --for condition=Ready --timeout=600s
 ```
 
 Wait for the nodeset setup to complete:

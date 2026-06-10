@@ -25,19 +25,8 @@ data:
       nicMappings:
         datacentre: ospbr
   glance:
-    customServiceConfig: |
-      [DEFAULT]
-      enabled_backends = default_backend:rbd
-      [glance_store]
-      default_backend = default_backend
-      [default_backend]
-      rbd_store_ceph_conf = /etc/ceph/ceph.conf
-      store_description = "Ceph RBD backend"
-      rbd_store_pool = images
-      rbd_store_user = openstack
-      rbd_thin_provisioning = True
     default:
-      replicas: 1
+      replicas: 0
   swift:
     enabled: false
   telemetry:
@@ -87,18 +76,5 @@ data:
       customServiceConfig: |
         [filter_scheduler]
         pci_in_placement = True
-  extraMounts:
-    - name: v1
-      region: r1
-      extraVol:
-        - propagation:
-            - GlanceAPI
-          extraVolType: Ceph
-          volumes:
-            - name: ceph
-              secret:
-                secretName: ceph-conf-files
-          mounts:
-            - name: ceph
-              mountPath: /etc/ceph
-              readOnly: true
+  # extraMounts for Ceph are applied during the post-ceph stage
+  # (see edpm-post-ceph/ kustomization) after ceph-conf-files secret exists.

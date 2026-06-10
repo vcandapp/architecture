@@ -1,0 +1,11 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+components:
+  - ../../../../../dt/nova/nova05epsilon/control-plane-post-ceph
+
+resources:
+  - network-values.yaml
+  - values.yaml
+  - service-values.yaml

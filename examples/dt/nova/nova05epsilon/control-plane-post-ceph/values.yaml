@@ -1,0 +1,18 @@
+# local-config: referenced, but not emitted by kustomize
+#
+# Ceph config for the control-plane-post-ceph stage.
+# In CI, ci_gen_kustomize_values populates ceph_conf from /tmp/ files
+# written by the ceph.yml hook (via the edpm-nodeset-values-post-ceph
+# Jinja2 template). For manual use, replace CHANGEME values with
+# base64-encoded Ceph keyring and conf.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edpm-nodeset-values-post-ceph
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  ceph_conf:
+    ceph.client.openstack.keyring: CHANGEME_CEPH_KEYRING
+    ceph.conf: CHANGEME_CEPH_CONF

@@ -28,7 +28,20 @@ This is a collection of CR templates that represent a Red Hat OpenStack Services
 
 5. Between stages 3 and 4, _it is assumed that the user installs Ceph on the compute nodes._ OpenStack K8S CRDs do not provide a way to install Ceph via any sort of combination of CRs.
 
-6. For CI automation, this DT uses `automation/vars/nova05epsilon.yaml` which maps the manual stages above to 9 granular automation steps (NNCP, networking, control-plane, DNS, baremetalhosts, pre-ceph nodeset, pre-ceph deployment, post-ceph nodeset, post-ceph deployment).
+6. In stage 5 the `control-plane-post-ceph` kustomization needs the same network values used in stage 2 to preserve endpoint IPs, service types, and DNS configuration. For manual deployment, copy your environment-customized `control-plane/networking/nncp/values.yaml` into `control-plane-post-ceph/network-values.yaml` and populate `control-plane-post-ceph/values.yaml` with base64-encoded Ceph keyring and config. In CI, `ci_gen_kustomize_values` generates `network-values.yaml` in-place using the common Jinja2 template with environment overlays. See [control-plane-post-ceph.md](control-plane-post-ceph.md) for details.
+
+7. On SNO with a single EDPM compute (single-host CephHCI), the Ceph ingress service (haproxy/keepalived) is not deployed. The default Swift endpoint (`<vip>:8080`) is unreachable because no ingress fronts the RGW daemon. Instead, clients must reach RGW directly on the compute's storage IP at port 8082 (the `rgw_frontend_port` set in the Ceph RGW spec).
+   For CI automation, set `cifmw_cephadm_rgw_port: 8082` and `cifmw_cephadm_rgw_vip: <compute_storage_ip>` in the scenario vars so that `cifmw_cephadm` creates the Keystone endpoint with the correct address.
+   For manual deployment, after installing Ceph, update the Swift endpoints in Keystone to point at the RGW daemon directly:
+
+   ```shell
+   STORAGE_IP=<compute storage network IP>
+   for ep_id in $(openstack endpoint list --service object-store -f value -c ID); do
+     openstack endpoint set --url "http://${STORAGE_IP}:8082/swift/v1/AUTH_%(tenant_id)s" "$ep_id"
+   done
+   ```
+
+8. For CI automation, this DT uses `automation/vars/nova05epsilon.yaml` which maps the manual stages above to 10 granular automation steps (NNCP, networking, control-plane, DNS, baremetalhosts, pre-ceph nodeset, pre-ceph deployment, control-plane-post-ceph, post-ceph nodeset, post-ceph deployment).
 
 ## Host Configuration
 
@@ -57,7 +70,9 @@ All stages must be executed in the order listed below. Everything is required un
 1. [Install the OpenStack K8S operators and their dependencies](../../../common/)
 2. [Configuring networking and deploy the OpenStack control plane](control-plane.md)
 3. [Configure and deploy the initial data plane to prepare for Ceph installation](dataplane-pre-ceph.md)
-4. [Update the control plane and finish deploying the data plane after Ceph has been installed](dataplane-post-ceph.md)
+4. Install Ceph on the compute nodes (without changing OpenStack CP CR)
+5. [Update the control plane with Ceph backend configuration](control-plane-post-ceph.md)
+6. [Finish deploying the data plane after Ceph has been installed](dataplane-post-ceph.md)
 
 ## Extending to a Full DCN Deployment
 

@@ -311,6 +311,7 @@
     - automation/net-env/nova05epsilon.yaml
     - examples/dt/nova/nova05epsilon
     - examples/dt/nova/nova05epsilon/control-plane
+    - examples/dt/nova/nova05epsilon/control-plane-post-ceph
     - examples/dt/nova/nova05epsilon/control-plane/networking
     - examples/dt/nova/nova05epsilon/control-plane/networking/dns
     - examples/dt/nova/nova05epsilon/control-plane/networking/nncp

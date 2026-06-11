@@ -72,7 +72,7 @@ data:
         cidr: 172.17.0.0/24
         name: subnet1
         vlan: 20
-    mtu: 1500
+    mtu: 9000
     prefix-length: 24
     iface: internalapi
     vlan: 20
@@ -106,7 +106,7 @@ data:
         cidr: 172.18.0.0/24
         name: subnet1
         vlan: 21
-    mtu: 1500
+    mtu: 9000
     prefix-length: 24
     iface: storage
     vlan: 21
@@ -136,7 +136,7 @@ data:
         cidr: 172.19.0.0/24
         name: subnet1
         vlan: 22
-    mtu: 1500
+    mtu: 9000
     prefix-length: 24
     iface: tenant
     vlan: 22
@@ -159,7 +159,7 @@ data:
 
   octavia:
     dnsDomain: octavia.openstack.lab
-    mtu: 1500
+    mtu: 9000
     vlan: 23
     base_iface: enp6s0
     net-attach-def: |
@@ -211,7 +211,7 @@ data:
         cidr: 192.168.122.0/24
         gateway: 192.168.122.1
         name: subnet1
-    mtu: 1500
+    mtu: 9000
 
   datacentre:
     net-attach-def: |

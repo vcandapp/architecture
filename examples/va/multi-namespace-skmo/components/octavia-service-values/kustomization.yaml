@@ -1,0 +1,10 @@
+---
+# Patch service-values ConfigMap with Octavia service parameters.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: service-values
+    path: octavia-service-values.yaml

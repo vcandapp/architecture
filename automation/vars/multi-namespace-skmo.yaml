@@ -15,7 +15,7 @@ vas:
         build_output: namespace.yaml
 
       - name: nncp-configuration    # stage 1
-        path: examples/va/multi-namespace/control-plane/networking/nncp
+        path: examples/va/multi-namespace-skmo/control-plane/networking/nncp
         wait_conditions:
           # We don't wait for these NNCPs at this stage, because we'll wait for
           # both namespaces in the next stage so that they can deploy in parallel
@@ -26,24 +26,24 @@ vas:
             --timeout=5m
         values:
           - name: network-values
-            src_file: values.yaml
+            src_file: ../../../../multi-namespace/control-plane/networking/nncp/values.yaml
         build_output: nncp.yaml
 
       - name: nncp-configuration2    # stage 2
-        path: examples/va/multi-namespace/control-plane2/networking/nncp
+        path: examples/va/multi-namespace-skmo/control-plane2/networking/nncp
         wait_conditions:
           - >-
-            oc -n openstack wait nncp
+            oc -n openstack2 wait nncp
             -l osp/nncm-config-type=standard
             --for jsonpath='{.status.conditions[0].reason}'=SuccessfullyConfigured
             --timeout=5m
         values:
           - name: network-values2
-            src_file: values.yaml
+            src_file: ../../../../multi-namespace/control-plane2/networking/nncp/values.yaml
         build_output: nncp2.yaml
 
       - name: network-configuration    # stage 3
-        path: examples/va/multi-namespace/control-plane/networking
+        path: examples/va/multi-namespace-skmo/control-plane/networking
         wait_conditions:
           - >-
             oc -n metallb-system wait pod
@@ -52,11 +52,11 @@ vas:
             --timeout=5m
         values:
           - name: network-values
-            src_file: nncp/values.yaml
+            src_file: ../../../multi-namespace/control-plane/networking/nncp/values.yaml
         build_output: network.yaml
 
       - name: network-configuration2    # stage 4
-        path: examples/va/multi-namespace/control-plane2/networking
+        path: examples/va/multi-namespace-skmo/control-plane2/networking
         wait_conditions:
           - >-
             oc -n metallb-system wait pod
@@ -65,7 +65,7 @@ vas:
             --timeout=5m
         values:
           - name: network-values2
-            src_file: nncp/values.yaml
+            src_file: ../../../multi-namespace/control-plane2/networking/nncp/values.yaml
         build_output: network2.yaml
 
       - pre_stage_run:    # stage 5
@@ -222,7 +222,7 @@ vas:
             inventory: "${HOME}/ci-framework-data/artifacts/zuul_inventory.yml"
 
       - name: edpm-nodeset    # stage 7
-        path: examples/va/multi-namespace/edpm/nodeset
+        path: examples/va/multi-namespace-skmo/edpm/nodeset
         wait_conditions:
           # We don't wait for this namespace's OpenStackDataPlaneNodeSet at
           # this stage, because we'll wait for both namespaces in the next
@@ -233,7 +233,7 @@ vas:
             --timeout=5m
         values:
           - name: edpm-nodeset-values
-            src_file: values.yaml
+            src_file: ../../../multi-namespace/edpm/nodeset/values.yaml
         build_output: nodeset.yaml
 
       - pre_stage_run:    # stage 8
@@ -242,7 +242,7 @@ vas:
             source: "../../playbooks/multi-namespace/ns2_osdp_services.yaml"
             inventory: "${HOME}/ci-framework-data/artifacts/zuul_inventory.yml"
         name: edpm-nodeset2
-        path: examples/va/multi-namespace/edpm2/nodeset
+        path: examples/va/multi-namespace-skmo/edpm2/nodeset
         wait_conditions:
           - >-
             oc -n openstack wait
@@ -254,10 +254,15 @@ vas:
             --timeout=10m
         values:
           - name: edpm-nodeset2-values
-            src_file: values.yaml
+            src_file: ../../../multi-namespace/edpm2/nodeset/values.yaml
         build_output: nodeset2.yaml
 
-      - name: edpm-deployment    # stage 9
+      - pre_stage_run:    # stage 9
+          - name: Recreate EDPM deployments when NodeSet config hash drifted
+            type: playbook
+            source: "skmo/recreate-edpm-deployment-if-stale.yaml"
+            inventory: "${HOME}/ci-framework-data/artifacts/zuul_inventory.yml"
+        name: edpm-deployment
         path: examples/va/multi-namespace/edpm
         wait_conditions:
           # We don't wait for this namespace's OpenStackDataPlaneDeployment at

@@ -107,11 +107,10 @@ coordination to automate this redeployment.
 
 ## Enabling Application Credentials
 
-AC is **enabled by default** — `control-plane2/application-credentials.yaml`
-is included in `kustomization.yaml` so it is applied on the very first OSCP
-deploy. Services start with `v3applicationcredential` auth from day one.
+AC is **enabled** in `control-plane2/application-credentials.yaml`
+is included in `kustomization.yaml`.
 
-Because the OSCP is created with AC already active, the OSCP `Ready` condition
+The OSCP `Ready` condition
 implicitly gates on all `KeystoneApplicationCredential` CRs being Ready (the
 service operators finish reconciling only once they have an
 `ApplicationCredentialSecret` set). EDPM compute nodes therefore receive AC

@@ -409,6 +409,52 @@ instances:
         prefix_length_v4: 24
         skip_nm: false
         vlan_id: 122
+  ocp-3:
+    hostname: worker-0
+    name: ocp-3
+    networks:
+      ctlplane:
+        interface_name: enp6s0
+        ip_v4: 192.168.122.20
+        mac_addr: "52:54:02:18:86:bc"
+        mtu: 1500
+        netmask_v4: 255.255.255.0
+        network_name: ctlplane
+        prefix_length_v4: 24
+        skip_nm: false
+      internalapi:
+        interface_name: enp6s0.120
+        ip_v4: 172.17.0.20
+        mac_addr: "52:54:00:04:df:88"
+        mtu: 1500
+        netmask_v4: 255.255.255.0
+        network_name: internalapi
+        parent_interface: enp6s0
+        prefix_length_v4: 24
+        skip_nm: false
+        vlan_id: 120
+      storage:
+        interface_name: enp6s0.121
+        ip_v4: 172.18.0.20
+        mac_addr: "52:54:00:7e:b2:1d"
+        mtu: 1500
+        netmask_v4: 255.255.255.0
+        network_name: storage
+        parent_interface: enp6s0
+        prefix_length_v4: 24
+        skip_nm: false
+        vlan_id: 121
+      tenant:
+        interface_name: enp6s0.122
+        ip_v4: 172.19.0.20
+        mac_addr: "52:54:00:12:d1:e1"
+        mtu: 1500
+        netmask_v4: 255.255.255.0
+        network_name: tenant
+        parent_interface: enp6s0
+        prefix_length_v4: 24
+        skip_nm: false
+        vlan_id: 122
   networker-0:
     hostname: networker-0
     name: networker-0

@@ -3,7 +3,7 @@ vas:
   uni04delta-adoption:
     stages:
       - name: nncp-configuration
-        path: examples/dt/uni04delta/control-plane/networking/nncp
+        path: examples/dt/uni04delta-adoption/control-plane/networking/nncp
         wait_conditions:
           - >-
             oc -n openstack wait nncp
@@ -16,7 +16,7 @@ vas:
         build_output: nncp.yaml
 
       - name: network-configuration
-        path: examples/dt/uni04delta/control-plane/networking
+        path: examples/dt/uni04delta-adoption/control-plane/networking
         wait_conditions:
           - >-
             oc -n metallb-system wait pod

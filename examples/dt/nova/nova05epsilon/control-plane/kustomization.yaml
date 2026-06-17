@@ -3,8 +3,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 components:
+  - ../network-values
   - ../../../../../dt/nova/nova05epsilon/
 
 resources:
-  - networking/nncp/values.yaml
   - service-values.yaml

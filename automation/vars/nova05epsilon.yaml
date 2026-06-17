@@ -12,7 +12,7 @@ vas:
             --timeout=5m
         values:
           - name: network-values
-            src_file: values.yaml
+            src_file: ../../../network-values/values.yaml
         build_output: nncp.yaml
 
       - name: network-configuration
@@ -25,7 +25,7 @@ vas:
             --timeout=5m
         values:
           - name: network-values
-            src_file: nncp/values.yaml
+            src_file: ../../network-values/values.yaml
         build_output: network.yaml
 
       - name: control-plane
@@ -37,7 +37,7 @@ vas:
             --timeout=20m
         values:
           - name: network-values
-            src_file: networking/nncp/values.yaml
+            src_file: ../network-values/values.yaml
           - name: service-values
             src_file: service-values.yaml
         build_output: control-plane.yaml
@@ -110,7 +110,7 @@ vas:
             --timeout=20m
         values:
           - name: network-values
-            src_file: network-values.yaml
+            src_file: ../network-values/values.yaml
           - name: service-values
             src_file: service-values.yaml
           - name: edpm-nodeset-values-post-ceph

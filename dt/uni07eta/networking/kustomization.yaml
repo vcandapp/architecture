@@ -24,6 +24,8 @@ components:
 resources:
   - ocp-networks-octavia-netattach.yaml
   - ocp-networks-ospbr-218-netattach.yaml
+  - ocp-networks-ospbr-100-netattach.yaml
+  - ocp-networks-ospbr-101-netattach.yaml
 
 
 replacements:
@@ -46,5 +48,27 @@ replacements:
       - select:
           kind: NetworkAttachmentDefinition
           name: ospbr-218
+        fieldPaths:
+          - spec.config
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-100.net-attach-def
+    targets:
+      - select:
+          kind: NetworkAttachmentDefinition
+          name: ospbr-100
+        fieldPaths:
+          - spec.config
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-101.net-attach-def
+    targets:
+      - select:
+          kind: NetworkAttachmentDefinition
+          name: ospbr-101
         fieldPaths:
           - spec.config

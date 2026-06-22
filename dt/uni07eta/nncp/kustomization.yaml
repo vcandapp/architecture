@@ -43,7 +43,7 @@ patches:
         path: /spec/desiredState/interfaces/-
         value:
           description: Octavia bridge
-          mtu: 1500
+          mtu: 9000
           name: octbr
           type: linux-bridge
           bridge:
@@ -76,7 +76,7 @@ patches:
         path: /spec/desiredState/interfaces/-
         value:
           description: Octavia bridge
-          mtu: 1500
+          mtu: 9000
           name: octbr
           type: linux-bridge
           bridge:
@@ -109,7 +109,7 @@ patches:
         path: /spec/desiredState/interfaces/-
         value:
           description: Octavia bridge
-          mtu: 1500
+          mtu: 9000
           name: octbr
           type: linux-bridge
           bridge:

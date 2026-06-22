@@ -173,6 +173,108 @@ patches:
           ipv4:
             enabled: false
 
+  - target:
+      kind: NodeNetworkConfigurationPolicy
+      name: master-0
+    patch: |-
+      - op: add
+        path: /spec/desiredState/interfaces/-
+        value:
+          description: Segment VLAN 100 interface
+          name: ospbr-100
+          state: up
+          type: vlan
+          vlan:
+            base-iface: ospbr
+            id: _replaced_
+          ipv4:
+            enabled: false
+
+  - target:
+      kind: NodeNetworkConfigurationPolicy
+      name: master-1
+    patch: |-
+      - op: add
+        path: /spec/desiredState/interfaces/-
+        value:
+          description: Segment VLAN 100 interface
+          name: ospbr-100
+          state: up
+          type: vlan
+          vlan:
+            base-iface: ospbr
+            id: _replaced_
+          ipv4:
+            enabled: false
+
+  - target:
+      kind: NodeNetworkConfigurationPolicy
+      name: master-2
+    patch: |-
+      - op: add
+        path: /spec/desiredState/interfaces/-
+        value:
+          description: Segment VLAN 100 interface
+          name: ospbr-100
+          state: up
+          type: vlan
+          vlan:
+            base-iface: ospbr
+            id: _replaced_
+          ipv4:
+            enabled: false
+
+  - target:
+      kind: NodeNetworkConfigurationPolicy
+      name: master-0
+    patch: |-
+      - op: add
+        path: /spec/desiredState/interfaces/-
+        value:
+          description: Segment VLAN 101 interface
+          name: ospbr-101
+          state: up
+          type: vlan
+          vlan:
+            base-iface: ospbr
+            id: _replaced_
+          ipv4:
+            enabled: false
+
+  - target:
+      kind: NodeNetworkConfigurationPolicy
+      name: master-1
+    patch: |-
+      - op: add
+        path: /spec/desiredState/interfaces/-
+        value:
+          description: Segment VLAN 101 interface
+          name: ospbr-101
+          state: up
+          type: vlan
+          vlan:
+            base-iface: ospbr
+            id: _replaced_
+          ipv4:
+            enabled: false
+
+  - target:
+      kind: NodeNetworkConfigurationPolicy
+      name: master-2
+    patch: |-
+      - op: add
+        path: /spec/desiredState/interfaces/-
+        value:
+          description: Segment VLAN 101 interface
+          name: ospbr-101
+          state: up
+          type: vlan
+          vlan:
+            base-iface: ospbr
+            id: _replaced_
+          ipv4:
+            enabled: false
+
 replacements:
   - source:
       kind: ConfigMap
@@ -240,6 +342,72 @@ replacements:
           name: master-2
         fieldPaths:
           - spec.desiredState.interfaces.[name=ospbr-218].mtu
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-100.vlan
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: master-0
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=ospbr-100].vlan.id
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-100.vlan
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: master-1
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=ospbr-100].vlan.id
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-100.vlan
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: master-2
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=ospbr-100].vlan.id
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-101.vlan
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: master-0
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=ospbr-101].vlan.id
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-101.vlan
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: master-1
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=ospbr-101].vlan.id
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.ospbr-101.vlan
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: master-2
+        fieldPaths:
+          - spec.desiredState.interfaces.[name=ospbr-101].vlan.id
 
   - source:
       kind: ConfigMap

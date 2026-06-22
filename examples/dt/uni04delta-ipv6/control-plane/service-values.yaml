@@ -147,8 +147,15 @@ data:
   ironic:
     enabled: true
     rpcTransport: oslo
+    ironicAPI:
+      customServiceConfig: |
+          [DEFAULT]
+          debug = true
     ironicConductors:
       - customServiceConfig: |
+          [DEFAULT]
+          debug = true
+
           [pxe]
           kernel_append_params = console=ttyS0
 
@@ -159,6 +166,9 @@ data:
           inspection_network = provisioning
     ironicInspector:
       customServiceConfig: |
+        [DEFAULT]
+        debug = true
+
         [capabilities]
         boot_mode = true
 

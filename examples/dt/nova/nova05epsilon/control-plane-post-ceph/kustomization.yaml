@@ -4,7 +4,8 @@ kind: Kustomization
 
 components:
   - ../network-values
-  - ../../../../../dt/nova/nova05epsilon/
+  - ../../../../../dt/nova/nova05epsilon/control-plane-post-ceph
 
 resources:
+  - values.yaml
   - service-values.yaml

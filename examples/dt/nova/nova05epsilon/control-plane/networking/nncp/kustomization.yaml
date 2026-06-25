@@ -18,12 +18,9 @@ transformers:
         create: true
 
 components:
+  - ../../../network-values
   - ../../../../../../../dt/nova/nova05epsilon/networking/nncp
   # To expose storagemgmt VLAN on the SNO node, uncomment the patch and
   # replacements block in dt/nova/nova05epsilon/networking/nncp/kustomization.yaml
   # and uncomment node_0.storagemgmt_ip in values.yaml.
   # Not required for CephHCI (Ceph uses the storage network for OSD traffic).
-
-
-resources:
-  - values.yaml

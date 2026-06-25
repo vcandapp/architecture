@@ -307,8 +307,11 @@
       cifmw_architecture_scenario: nova04delta-adoption
 - job:
     files:
+    - automation/mocks/nova05epsilon.yaml
+    - automation/net-env/nova05epsilon.yaml
     - examples/dt/nova/nova05epsilon
     - examples/dt/nova/nova05epsilon/control-plane
+    - examples/dt/nova/nova05epsilon/control-plane-post-ceph
     - examples/dt/nova/nova05epsilon/control-plane/networking
     - examples/dt/nova/nova05epsilon/control-plane/networking/dns
     - examples/dt/nova/nova05epsilon/control-plane/networking/nncp
@@ -321,6 +324,7 @@
     parent: rhoso-architecture-base-job
     vars:
       cifmw_architecture_scenario: nova05epsilon
+      cifmw_networking_env_def_file: automation/net-env/nova05epsilon.yaml
 - job:
     files:
     - examples/va/nvidia-mdev/control-plane

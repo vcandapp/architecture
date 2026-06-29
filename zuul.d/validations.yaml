@@ -565,8 +565,8 @@
 - job:
     files:
     - automation/net-env/uni04delta-adoption.yaml
-    - examples/dt/uni04delta/control-plane/networking
-    - examples/dt/uni04delta/control-plane/networking/nncp
+    - examples/dt/uni04delta-adoption/control-plane/networking
+    - examples/dt/uni04delta-adoption/control-plane/networking/nncp
     - lib
     name: rhoso-architecture-validate-uni04delta-adoption
     parent: rhoso-architecture-base-job

@@ -1,0 +1,23 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../multi-namespace/edpm2/nodeset
+  - skmo-edpm-overrides.yaml
+
+components:
+  - ../../components/octavia-edpm-bridge
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: skmo-edpm-overrides
+      fieldPath: data.edpm_nodes_validation_check_for_fqdn
+    targets:
+      - select:
+          kind: OpenStackDataPlaneNodeSet
+        fieldPaths:
+          - spec.nodeTemplate.ansible.ansibleVars.edpm_nodes_validation_check_for_fqdn
+        options:
+          create: true

@@ -4,9 +4,12 @@ kind: Component
 
 components:
   - ../../multi-namespace/control-plane2
+  - ../../../../va/multi-namespace-skmo/octavia-controlplane
 
 resources:
   - skmo-values.yaml
+  - networking/octavia-netattach.yaml
+  - octavia-ca-passphrase.yaml
 
 patches:
   - target:

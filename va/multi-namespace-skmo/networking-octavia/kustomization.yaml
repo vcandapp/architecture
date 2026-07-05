@@ -1,0 +1,61 @@
+---
+# Octavia NetConfig and NAD wiring for SKMO network-configuration stages.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+components:
+  - ../../../examples/va/multi-namespace-skmo/components/octavia-network-values
+
+patches:
+  - target:
+      version: v1beta1
+      kind: NetConfig
+      name: netconfig
+    patch: |-
+      - op: add
+        path: /spec/networks/-
+        value:
+          dnsDomain: _replaced_
+          name: octavia
+          subnets:
+            - _replaced_
+          mtu: 1500
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: octavia-network-values
+      fieldPath: data.octavia.dnsDomain
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=octavia].dnsDomain
+  - source:
+      kind: ConfigMap
+      name: octavia-network-values
+      fieldPath: data.octavia.mtu
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=octavia].mtu
+  - source:
+      kind: ConfigMap
+      name: octavia-network-values
+      fieldPath: data.octavia.subnets
+    targets:
+      - select:
+          kind: NetConfig
+        fieldPaths:
+          - spec.networks.[name=octavia].subnets
+  - source:
+      kind: ConfigMap
+      name: octavia-network-values
+      fieldPath: data.octavia.net-attach-def
+    targets:
+      - select:
+          kind: NetworkAttachmentDefinition
+          name: octavia
+        fieldPaths:
+          - spec.config

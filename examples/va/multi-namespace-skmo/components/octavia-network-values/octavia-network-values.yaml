@@ -1,0 +1,40 @@
+# local-config: octavia keys for replacements (static oc kustomize; ci-gen also adds octavia at deploy)
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: octavia-network-values
+  annotations:
+    config.kubernetes.io/local-config: "true"
+data:
+  octavia:
+    dnsDomain: octavia.example.com
+    mtu: 1500
+    vlan: 23
+    base_iface: enp7s0
+    subnets:
+      - allocationRanges:
+          - end: 172.23.0.250
+            start: 172.23.0.100
+        cidr: 172.23.0.0/24
+        name: subnet1
+        vlan: 23
+    net-attach-def: |
+      {
+        "cniVersion": "0.3.1",
+        "name": "octavia",
+        "type": "bridge",
+        "bridge": "octbr",
+        "ipam": {
+          "type": "whereabouts",
+          "range": "172.23.0.0/24",
+          "range_start": "172.23.0.30",
+          "range_end": "172.23.0.70",
+          "routes": [
+            {
+              "dst": "172.24.0.0/16",
+              "gw": "172.23.0.150"
+            }
+          ]
+        }
+      }

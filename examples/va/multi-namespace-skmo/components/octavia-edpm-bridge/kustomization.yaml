@@ -1,0 +1,10 @@
+---
+# OVN Octavia compute bridge overlay for EDPM nodesets.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: edpm-nodeset-values
+    path: edpm-octavia-ansible-vars.yaml

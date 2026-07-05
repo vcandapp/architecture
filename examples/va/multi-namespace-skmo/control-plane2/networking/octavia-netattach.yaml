@@ -1,0 +1,12 @@
+---
+apiVersion: k8s.cni.cncf.io/v1
+kind: NetworkAttachmentDefinition
+metadata:
+  name: octavia
+  namespace: openstack2
+  labels:
+    osp/net: octavia
+    osp/net-attach-def-type: standard
+spec:
+  config: |
+    _replaced_

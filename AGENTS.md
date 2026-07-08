@@ -99,6 +99,10 @@ Stages in `automation/vars/<name>.yaml` follow this conventional order:
    Timeout: **10m**.
 7. `edpm-deployment` -- Compute dataplane deployment. Timeout: **60m**.
 
+Timeouts shown are the most common values. Actual timeouts vary by
+topology — check the closest existing automation vars file rather than
+copying these defaults.
+
 Not all stages are required. Simple topologies may skip networker stages.
 Ceph-based topologies split dataplane into pre-ceph and post-ceph stages.
 
@@ -125,6 +129,12 @@ vas:
             --timeout=5m
 ```
 
+`build_output` -- filename for the kustomize build output artifact.
+ci-framework's `kustomize_deploy` role runs `kustomize build` on the stage's
+`path` and writes the result to this file, then applies it with `oc apply`.
+Every stage should specify one; the name is freeform but conventionally
+reflects the stage (e.g., `nncp.yaml`, `control-plane.yaml`, `edpm.yaml`).
+
 The `values` field uses objects with `name` (ConfigMap name) and `src_file`
 (filename relative to `path`).
 
@@ -134,8 +144,14 @@ The optional `pre_stage_run` and `post_stage_run` fields are siblings of
 `name`, `path`, and `values` within a stage list item. They accept a list
 of structured hook objects. Two hook types are supported:
 
-**`type: cr`** -- patch or create a Kubernetes resource. For non-core
-resources, `api_version` and `namespace` fields are also available:
+Both hook types share `name` and `type`. The remaining fields are
+type-specific — do not mix them:
+
+- **`type: cr`** fields: `kind`, `resource_name`, `state`, `definition`
+  (and optionally `api_version`, `namespace` for non-core resources).
+- **`type: playbook`** fields: `source`, `inventory`.
+
+**`type: cr`** -- patch or create a Kubernetes resource:
 
 ```yaml
       - name: nncp-configuration

@@ -82,6 +82,108 @@ These files are validated against the Yamale schema at
 `.ci/automation-schema.yaml`. If you change the automation structure, update
 the schema as well.
 
+#### Standard stage ordering
+
+Stages in `automation/vars/<name>.yaml` follow this conventional order:
+
+1. `nncp-configuration` -- Node Network Configuration Policies (may include
+   pre-stage node labeling). Timeout: **5m**.
+2. `network-configuration` -- MetalLB, broader networking (wait for MetalLB
+   speaker pods).
+3. `control-plane` -- OpenStackControlPlane CR. Timeout: **60m**.
+4. `edpm-networker-nodeset` -- Networker dataplane nodeset (if applicable).
+   Timeout: **10m**.
+5. `edpm-networker-deployment` -- Networker deployment (if applicable).
+   Timeout: **40m**.
+6. `edpm-nodeset` -- Compute dataplane nodeset (wait for SetupReady).
+   Timeout: **10m**.
+7. `edpm-deployment` -- Compute dataplane deployment. Timeout: **60m**.
+
+Timeouts shown are the most common values. Actual timeouts vary by
+topology — check the closest existing automation vars file rather than
+copying these defaults.
+
+Not all stages are required. Simple topologies may skip networker stages.
+Ceph-based topologies split dataplane into pre-ceph and post-ceph stages.
+
+#### Stage definition example
+
+Each automation vars file wraps stages under `vas: <topology-name>:` (the
+repo uses `vas:` as the top-level key for both VAs and DTs):
+
+```yaml
+vas:
+  <topology-name>:
+    stages:
+      - name: nncp-configuration
+        path: examples/dt/<topology>/control-plane/networking/nncp
+        values:
+          - name: network-values
+            src_file: values.yaml
+        build_output: nncp.yaml
+        wait_conditions:
+          - >-
+            oc -n openstack wait nncp
+            -l osp/nncm-config-type=standard
+            --for jsonpath='{.status.conditions[0].reason}'=SuccessfullyConfigured
+            --timeout=5m
+```
+
+`build_output` -- filename for the kustomize build output artifact.
+ci-framework's `kustomize_deploy` role runs `kustomize build` on the stage's
+`path` and writes the result to this file, then applies it with `oc apply`.
+Every stage should specify one; the name is freeform but conventionally
+reflects the stage (e.g., `nncp.yaml`, `control-plane.yaml`, `edpm.yaml`).
+
+The `values` field uses objects with `name` (ConfigMap name) and `src_file`
+(filename relative to `path`).
+
+#### `pre_stage_run` / `post_stage_run` hook format
+
+The optional `pre_stage_run` and `post_stage_run` fields are siblings of
+`name`, `path`, and `values` within a stage list item. They accept a list
+of structured hook objects. Two hook types are supported:
+
+Both hook types share `name` and `type`. The remaining fields are
+type-specific — do not mix them:
+
+- **`type: cr`** fields: `kind`, `resource_name`, `state`, `definition`
+  (and optionally `api_version`, `namespace` for non-core resources).
+- **`type: playbook`** fields: `source`, `inventory`.
+
+**`type: cr`** -- patch or create a Kubernetes resource:
+
+```yaml
+      - name: nncp-configuration
+        pre_stage_run:
+          - name: "Apply cinder-lvm label"
+            type: cr
+            kind: Node
+            resource_name: master-0
+            state: patched
+            definition:
+              metadata:
+                labels:
+                  openstack.org/cinder-lvm: ""
+        path: examples/dt/<topology>/control-plane/networking/nncp
+```
+
+**`type: playbook`** -- run an Ansible playbook (used for Ceph deployment
+and similar operations that require orchestration beyond `oc` commands):
+
+```yaml
+        post_stage_run:
+          - name: "Deploy Ceph"
+            type: playbook
+            source: "../../hooks/playbooks/ceph.yml"
+            inventory: "${HOME}/ci-framework-data/artifacts/zuul_inventory.yml"
+```
+
+The `source` path is resolved by ci-framework at runtime; paths with
+`../../` are relative to the automation vars file location, while bare
+filenames are resolved from ci-framework's playbook search paths. The
+`inventory` path may use environment variables.
+
 ### Generated files -- do not hand-edit
 
 The following files are **generated** by `create-zuul-jobs.py`:

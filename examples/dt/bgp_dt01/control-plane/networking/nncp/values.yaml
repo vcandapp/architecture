@@ -211,6 +211,7 @@ data:
         vlan: 20
     mtu: 1500
     prefix-length: 24
+    gateway: 172.17.0.1
     iface: internalapi
     vlan: 20
     base_iface: enp7s0
@@ -249,6 +250,7 @@ data:
         vlan: 21
     mtu: 1500
     prefix-length: 24
+    gateway: 172.18.0.1
     iface: storage
     vlan: 21
     base_iface: enp7s0
@@ -281,6 +283,8 @@ data:
         name: subnet1
         vlan: 23
     mtu: 1500
+    prefix-length: 24
+    gateway: 172.23.0.1
     vlan: 23
     base_iface: enp7s0
     net-attach-def: |
@@ -309,6 +313,8 @@ data:
 
   designate:
     # only NAD is used for designate
+    prefix-length: 24
+    gateway: 172.26.0.1
     net-attach-def: |
       {
         "cniVersion": "0.3.1",

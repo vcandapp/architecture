@@ -19,11 +19,21 @@ spec:
         state: up
         type: linux-bridge
         mtu: 1500
+        ipv4:
+          address:
+            - ip: _replaced_
+              prefix-length: _replaced_
+          enabled: true
       - description: storage bridge
         name: storage
         state: up
         type: linux-bridge
         mtu: 1500
+        ipv4:
+          address:
+            - ip: _replaced_
+              prefix-length: _replaced_
+          enabled: true
       - description: ctlplane interface
         name: _replaced_
         state: up

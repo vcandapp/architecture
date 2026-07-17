@@ -1185,3 +1185,45 @@ replacements:
           name: worker-9
         fieldPaths:
           - spec.desiredState.routes
+
+  # internalapi bridge gateway IP and prefix-length
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.internalapi.gateway
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.0.ipv4.address.0.ip
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.internalapi.prefix-length
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.0.ipv4.address.0.prefix-length
+
+  # storage bridge gateway IP and prefix-length
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.storage.gateway
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.1.ipv4.address.0.ip
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.storage.prefix-length
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.1.ipv4.address.0.prefix-length

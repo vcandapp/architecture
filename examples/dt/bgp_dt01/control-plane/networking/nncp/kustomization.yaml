@@ -98,6 +98,11 @@ patches:
           name: octavia
           type: linux-bridge
           state: up
+          ipv4:
+            address:
+              - ip: _replaced_
+                prefix-length: _replaced_
+            enabled: true
   - target:
       kind: NodeNetworkConfigurationPolicy
     patch: |-
@@ -109,6 +114,11 @@ patches:
           name: designate
           type: linux-bridge
           state: up
+          ipv4:
+            address:
+              - ip: _replaced_
+                prefix-length: _replaced_
+            enabled: true
 
 replacements:
   # Node names (workers)
@@ -562,3 +572,153 @@ replacements:
           name: worker-2
         fieldPaths:
           - spec.desiredState.routes
+
+  # internalapi bridge gateway IP and prefix-length
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.internalapi.gateway
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.0.ipv4.address.0.ip
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.internalapi.prefix-length
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.0.ipv4.address.0.prefix-length
+
+  # storage bridge gateway IP and prefix-length
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.storage.gateway
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.1.ipv4.address.0.ip
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.storage.prefix-length
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+        fieldPaths:
+          - spec.desiredState.interfaces.1.ipv4.address.0.prefix-length
+
+  # octavia bridge gateway IP and prefix-length
+  # octavia is at index 7 for workers 0-2 (which have 2 BGP ifaces) and index 6 for worker-3
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.octavia.gateway
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-0
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.ip
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-1
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.ip
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-2
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.ip
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-3
+        fieldPaths:
+          - spec.desiredState.interfaces.6.ipv4.address.0.ip
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.octavia.prefix-length
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-0
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.prefix-length
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-1
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.prefix-length
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-2
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.prefix-length
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-3
+        fieldPaths:
+          - spec.desiredState.interfaces.6.ipv4.address.0.prefix-length
+
+  # designate bridge gateway IP and prefix-length
+  # designate is at index 8 for workers 0-2 and index 7 for worker-3
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designate.gateway
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-0
+        fieldPaths:
+          - spec.desiredState.interfaces.8.ipv4.address.0.ip
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-1
+        fieldPaths:
+          - spec.desiredState.interfaces.8.ipv4.address.0.ip
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-2
+        fieldPaths:
+          - spec.desiredState.interfaces.8.ipv4.address.0.ip
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-3
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.ip
+
+  - source:
+      kind: ConfigMap
+      name: network-values
+      fieldPath: data.designate.prefix-length
+    targets:
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-0
+        fieldPaths:
+          - spec.desiredState.interfaces.8.ipv4.address.0.prefix-length
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-1
+        fieldPaths:
+          - spec.desiredState.interfaces.8.ipv4.address.0.prefix-length
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-2
+        fieldPaths:
+          - spec.desiredState.interfaces.8.ipv4.address.0.prefix-length
+      - select:
+          kind: NodeNetworkConfigurationPolicy
+          name: worker-3
+        fieldPaths:
+          - spec.desiredState.interfaces.7.ipv4.address.0.prefix-length
